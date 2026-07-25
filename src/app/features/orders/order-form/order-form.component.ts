@@ -1,5 +1,11 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormArray,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
@@ -50,11 +56,32 @@ export class OrderFormComponent implements OnInit {
   readonly customers = signal<Customer[]>([]);
   readonly products = signal<Product[]>([]);
 
+  private readonly matchesRealCustomer: ValidatorFn = (control) => {
+    const value = (control.value ?? '').trim();
+    if (!value) return null; // let Validators.required own the "empty" case
+    const isValid = this.customers().some((c) => `${c.firstName} ${c.lastName}` === value);
+    return isValid ? null : { invalidSelection: true };
+  };
+
   readonly form = this.fb.group({
     customerId: this.fb.control<number | null>(null, Validators.required),
-    customerSearch: this.fb.nonNullable.control('', Validators.required),
+    customerSearch: this.fb.nonNullable.control('', [
+      Validators.required,
+      this.matchesRealCustomer,
+    ]),
     items: this.fb.array([this.createItemGroup()]),
   });
+
+  constructor() {
+    this.form.controls.customerSearch.valueChanges.subscribe((text) => {
+      const selectedId = this.form.controls.customerId.value;
+      const selected = this.customers().find((c) => c.id === selectedId);
+      const expectedText = selected ? `${selected.firstName} ${selected.lastName}` : '';
+      if (text !== expectedText) {
+        this.form.controls.customerId.setValue(null, { emitEvent: false });
+      }
+    });
+  }
 
   get items(): FormArray {
     return this.form.controls.items as FormArray;
@@ -82,7 +109,7 @@ export class OrderFormComponent implements OnInit {
   filteredCustomers(): Customer[] {
     const query = (this.form.controls.customerSearch.value ?? '').toLowerCase();
     return this.customers().filter(
-      (p) => p.firstName.toLowerCase().includes(query) || p.lastName.toLowerCase().includes(query),
+      (c) => c.firstName.toLowerCase().includes(query) || c.lastName.toLowerCase().includes(query),
     );
   }
 

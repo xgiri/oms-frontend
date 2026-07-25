@@ -9,7 +9,7 @@
         <mat-label>Customer</mat-label>
         <input
           matInput
-          [formControlName]="'customerSearch'"
+          formControlName="customerSearch"
           [matAutocomplete]="customerAuto"
           placeholder="Type to search…"
         />
@@ -23,8 +23,8 @@
             >
           }
         </mat-autocomplete>
-        @if (form.controls.customerId.hasError('required') && form.controls.customerId.touched) {
-          <mat-error>Please select a customer.</mat-error>
+        @if (form.controls.customerSearch.invalid && form.controls.customerSearch.touched) {
+          <mat-error>Please select a customer from the list.</mat-error>
         }
       </mat-form-field>
 
