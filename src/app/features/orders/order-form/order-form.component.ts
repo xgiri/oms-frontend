@@ -14,6 +14,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { CurrencyPipe } from '@angular/common';
 import { OrderService } from '../order.service';
 import { CustomerService } from '../../customers/customer.service';
 import { Customer } from '../../customers/customer.model';
@@ -21,9 +23,7 @@ import { ProductService } from '../../products/product.service';
 import { Product } from '../../products/product.model';
 import { ApiError } from '../../../shared/models/api-error.model';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
-import { CurrencyPipe } from '@angular/common';
 import { OrderRequest } from '../order.model';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 @Component({
   selector: 'app-order-form',
@@ -37,8 +37,8 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    CurrencyPipe,
     MatAutocompleteModule,
+    CurrencyPipe,
   ],
   templateUrl: './order-form.html',
   styleUrl: './order-form.scss',
@@ -56,36 +56,33 @@ export class OrderFormComponent implements OnInit {
   readonly customers = signal<Customer[]>([]);
   readonly products = signal<Product[]>([]);
 
-  private readonly matchesRealCustomer: ValidatorFn = (control) => {
-    const value = (control.value ?? '').trim();
-    if (!value) return null; // let Validators.required own the "empty" case
-    const isValid = this.customers().some((c) => `${c.firstName} ${c.lastName}` === value);
-    return isValid ? null : { invalidSelection: true };
+  // The control's value is one of three things at any moment:
+  // - null (nothing typed/selected yet)
+  // - a string (the user is typing, hasn't picked an option)
+  // - a real Customer object (a genuine selection was made)
+  // Only the third case is actually valid — this validator enforces that
+  // directly, so there's no separate id control to keep in sync anymore.
+  private readonly requireRealCustomer: ValidatorFn = (control) => {
+    const value = control.value;
+    if (value === null || value === '') return { required: true };
+    if (typeof value === 'string') return { invalidSelection: true };
+    return null;
   };
 
   readonly form = this.fb.group({
-    customerId: this.fb.control<number | null>(null, Validators.required),
-    customerSearch: this.fb.nonNullable.control('', [
-      Validators.required,
-      this.matchesRealCustomer,
-    ]),
+    customer: this.fb.control<Customer | string | null>(null, this.requireRealCustomer),
     items: this.fb.array([this.createItemGroup()]),
   });
-
-  constructor() {
-    this.form.controls.customerSearch.valueChanges.subscribe((text) => {
-      const selectedId = this.form.controls.customerId.value;
-      const selected = this.customers().find((c) => c.id === selectedId);
-      const expectedText = selected ? `${selected.firstName} ${selected.lastName}` : '';
-      if (text !== expectedText) {
-        this.form.controls.customerId.setValue(null, { emitEvent: false });
-      }
-    });
-  }
 
   get items(): FormArray {
     return this.form.controls.items as FormArray;
   }
+
+  displayCustomer = (customer: Customer | string | null): string => {
+    if (!customer) return '';
+    if (typeof customer === 'string') return customer;
+    return `${customer.firstName} ${customer.lastName}`;
+  };
 
   private createItemGroup() {
     return this.fb.group({
@@ -107,9 +104,9 @@ export class OrderFormComponent implements OnInit {
   }
 
   filteredCustomers(): Customer[] {
-    const query = (this.form.controls.customerSearch.value ?? '').toLowerCase();
-    return this.customers().filter(
-      (c) => c.firstName.toLowerCase().includes(query) || c.lastName.toLowerCase().includes(query),
+    const query = this.displayCustomer(this.form.controls.customer.value).toLowerCase();
+    return this.customers().filter((c) =>
+      c.firstName.toLowerCase().concat(' ').concat(c.lastName.toLowerCase()).includes(query),
     );
   }
 
@@ -126,11 +123,6 @@ export class OrderFormComponent implements OnInit {
 
   get allProductsSelected(): boolean {
     return this.selectedProductCount() === this.products().length && this.products().length > 0;
-  }
-
-  onCustomerSelected(customer: Customer): void {
-    this.form.controls.customerId.setValue(customer.id);
-    this.form.controls.customerSearch.setValue(`${customer.firstName} ${customer.lastName}`);
   }
 
   addItem(): void {
@@ -170,9 +162,10 @@ export class OrderFormComponent implements OnInit {
     this.saving.set(true);
     this.errorMessage.set(null);
     const raw = this.form.getRawValue();
+    const customer = raw.customer as Customer; // validator guarantees this is a real Customer here
 
     const request: OrderRequest = {
-      customerId: raw.customerId!,
+      customerId: customer.id,
       items: raw.items.map((item) => ({ productId: item.productId!, quantity: item.quantity })),
     };
 

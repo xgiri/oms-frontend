@@ -9,21 +9,18 @@
         <mat-label>Customer</mat-label>
         <input
           matInput
-          formControlName="customerSearch"
+          formControlName="customer"
           [matAutocomplete]="customerAuto"
           placeholder="Type to search…"
         />
-        <mat-autocomplete
-          #customerAuto="matAutocomplete"
-          (optionSelected)="onCustomerSelected($event.option.value)"
-        >
+        <mat-autocomplete #customerAuto="matAutocomplete" [displayWith]="displayCustomer">
           @for (customer of filteredCustomers(); track customer.id) {
             <mat-option [value]="customer"
               >{{ customer.firstName }} {{ customer.lastName }}</mat-option
             >
           }
         </mat-autocomplete>
-        @if (form.controls.customerSearch.invalid && form.controls.customerSearch.touched) {
+        @if (form.controls.customer.invalid && form.controls.customer.touched) {
           <mat-error>Please select a customer from the list.</mat-error>
         }
       </mat-form-field>
