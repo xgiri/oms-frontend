@@ -66,9 +66,18 @@ npx openapi-typescript http://localhost:8080/v3/api-docs -o src/app/shared/model
 --legacy-peer-deps tells npm to skip strict peer-dependency resolution for this install (closer to how npm behaved pre-v7) — appropriate here specifically because this is a dev-only, standalone codegen tool, not a runtime dependency that shares TypeScript's actual compilation pipeline with the app.
 
 This one is for GraphQL
+
 ```bash
-npm install -D @graphql-codegen/cli @graphql-codegen/typescript @graphql-codegen/typescript-operations @graphql-codegen/typed-document-node graphql --legacy-peer-deps
+npm uninstall graphql --legacy-peer-deps
+npm install graphql --legacy-peer-deps
 ```
 
+That moves graphql from devDependencies to dependencies, since print() now runs at runtime in the browser, not just during codegen.
+
+```bash
+npm install -D @graphql-codegen/cli @graphql-codegen/typescript @graphql-codegen/typescript-operations @graphql-codegen/typed-document-node graphql --legacy-peer-deps
+npm install -D @graphql-typed-document-node/core --legacy-peer-deps
+npm run codegen
+```
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

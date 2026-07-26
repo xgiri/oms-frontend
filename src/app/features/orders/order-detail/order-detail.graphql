@@ -1,0 +1,22 @@
+query OrderDetail($id: ID!) {
+  orderDetail(id: $id) {
+    id
+    status
+    totalAmount
+    customer {
+      id
+      name
+      email
+    }
+    payment {
+      id
+      status
+      amount
+    }
+    shipment {
+      id
+      status
+      trackingNumber
+    }
+  }
+}
