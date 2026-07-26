@@ -75,8 +75,7 @@ npm install graphql --legacy-peer-deps
 That moves graphql from devDependencies to dependencies, since print() now runs at runtime in the browser, not just during codegen.
 
 ```bash
-npm install -D @graphql-codegen/cli @graphql-codegen/typescript @graphql-codegen/typescript-operations @graphql-codegen/typed-document-node graphql --legacy-peer-deps
-npm install -D @graphql-typed-document-node/core --legacy-peer-deps
+npm install -D @graphql-codegen/cli @graphql-codegen/typescript @graphql-codegen/typescript-operations @graphql-codegen/typed-document-node @graphql-typed-document-node/core --legacy-peer-deps
 npm run codegen
 ```
 

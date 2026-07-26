@@ -16,6 +16,14 @@ const config: CodegenConfig = {
   generates: {
     'src/app/features/orders/order-detail/order-detail.generated.ts': {
       plugins: ['typescript', 'typescript-operations', 'typed-document-node'],
+      config: {
+        // OrderStatus/PaymentStatus/ShipmentStatus become plain string
+        // literal unions (e.g. 'PENDING' | 'CONFIRMED' | ...) instead of
+        // runtime TS enums — that's what lets OrderDetailQuery['orderDetail']['status']
+        // line up directly with the OpenAPI-derived OrderStatus in
+        // order.model.ts, which is the same kind of literal union.
+        enumsAsTypes: true,
+      },
     },
   },
 };

@@ -55,16 +55,12 @@ export class OrderDetailComponent implements OnInit {
   selectedNextStatus: OrderStatus | null = null;
 
   get availableTransitions(): OrderStatus[] {
-    // GraphQL's schema types `status` as a plain String (no enum), so this
-    // cast is what recovers the OrderStatus literal union the transition
-    // maps are keyed on — the underlying values still come straight from
-    // oms-main, same as the REST path, so this is safe.
-    const current = this.order()?.status as OrderStatus | undefined;
+    const current = this.order()?.status;
     return current ? getAllowedTransitions(ALLOWED_MANUAL_TRANSITIONS, current) : [];
   }
 
   get adminOverrideTransitions(): OrderStatus[] {
-    const current = this.order()?.status as OrderStatus | undefined;
+    const current = this.order()?.status;
     if (!current || !this.authService.hasRole('ADMIN')) return [];
     return ADMIN_OVERRIDE_TRANSITIONS[current] ?? [];
   }
