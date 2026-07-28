@@ -118,6 +118,10 @@ export class OrdersListComponent implements OnInit {
     return isDeletableStatus(DELETABLE_STATUSES, order.status);
   }
 
+  get isFiltering(): boolean {
+    return !!this.filterForm.value.status;
+  }
+
   viewOrder(order: Order): void {
     this.router.navigate(['/orders', order.id]);
   }

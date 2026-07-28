@@ -96,7 +96,7 @@ export class ShipmentsListComponent implements OnInit {
     });
   }
 
-  private isFiltering(): boolean {
+  isFiltering(): boolean {
     const { orderId, status } = this.filterForm.value;
     return orderId != null || !!status;
   }

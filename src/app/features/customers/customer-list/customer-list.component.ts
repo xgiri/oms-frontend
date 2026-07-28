@@ -67,7 +67,7 @@ export class CustomersListComponent implements OnInit {
     });
   }
 
-  private isFiltering(): boolean {
+  isFiltering(): boolean {
     const { name, email, status } = this.filterForm.value;
     return !!name || !!email || !!status;
   }

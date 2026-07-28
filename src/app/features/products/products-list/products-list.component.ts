@@ -71,7 +71,7 @@ export class ProductsListComponent implements OnInit {
     });
   }
 
-  private isFiltering(): boolean {
+  isFiltering(): boolean {
     const { name, minPrice, maxPrice } = this.filterForm.value;
     return !!name || minPrice != null || maxPrice != null;
   }

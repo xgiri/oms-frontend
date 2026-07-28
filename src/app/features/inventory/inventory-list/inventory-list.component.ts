@@ -72,7 +72,7 @@ export class InventoryListComponent implements OnInit {
     });
   }
 
-  private isFiltering(): boolean {
+  isFiltering(): boolean {
     const { location, lowStockOnly } = this.filterForm.value;
     return !!location || !!lowStockOnly;
   }

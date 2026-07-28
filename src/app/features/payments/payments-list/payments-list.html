@@ -99,6 +99,15 @@
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell no-data-cell" [attr.colspan]="displayedColumns.length">
+        @if (isFiltering()) {
+          No payments found for the applied filters.
+        } @else {
+          No payments found. Create one to get started.
+        }
+      </td>
+    </tr>
   </table>
 
   <mat-paginator

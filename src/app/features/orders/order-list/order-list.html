@@ -90,6 +90,15 @@
       [attr.aria-label]="'View order ' + row.id"
       class="clickable-row"
     ></tr>
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell no-data-cell" [attr.colspan]="displayedColumns.length">
+        @if (isFiltering) {
+          No orders found for the applied filters.
+        } @else {
+          No orders found. Create one to get started.
+        }
+      </td>
+    </tr>
   </table>
 
   <mat-paginator
