@@ -21,6 +21,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ApiError } from '../../../shared/models/api-error.model';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { isDeletableStatus } from '../../../shared/models/status-workflow.model';
+import { TableSkeletonComponent } from '../../../shared/components/table-skeleton/table-skeleton.component';
 
 @Component({
   selector: 'app-orders-list',
@@ -41,6 +42,7 @@ import { isDeletableStatus } from '../../../shared/models/status-workflow.model'
     HasRoleDirective,
     CurrencyPipe,
     DatePipe,
+    TableSkeletonComponent,
   ],
   templateUrl: './order-list.html',
   styleUrl: './order-list.scss',

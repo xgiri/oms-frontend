@@ -17,6 +17,7 @@ import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { ProductService } from '../product.service';
 import { Product } from '../product.model';
+import { TableSkeletonComponent } from '../../../shared/components/table-skeleton/table-skeleton.component';
 
 @Component({
   selector: 'app-products-list',
@@ -35,6 +36,7 @@ import { Product } from '../product.model';
     HasRoleDirective,
     CurrencyPipe,
     DatePipe,
+    TableSkeletonComponent,
   ],
   templateUrl: './products-list.html',
   styleUrl: './products-list.scss',

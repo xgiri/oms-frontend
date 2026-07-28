@@ -22,103 +22,107 @@
     </mat-form-field>
   </form>
 
-  @if (loading()) {
-    <div class="loading-row">
-      <mat-spinner diameter="32"></mat-spinner>
-    </div>
-  }
-  <table mat-table [dataSource]="shipments()">
-    <ng-container matColumnDef="orderId">
-      <th mat-header-cell *matHeaderCellDef>Order #</th>
-      <td mat-cell *matCellDef="let shipment">{{ shipment.orderId }}</td>
-    </ng-container>
+  @if (loading() && shipments().length === 0) {
+    <app-table-skeleton [columns]="displayedColumns.length" [rows]="5"></app-table-skeleton>
+  } @else {
+    @if (loading()) {
+      <div class="loading-row">
+        <mat-spinner diameter="32"></mat-spinner>
+      </div>
+    }
+    <table mat-table [dataSource]="shipments()">
+      <ng-container matColumnDef="orderId">
+        <th mat-header-cell *matHeaderCellDef>Order #</th>
+        <td mat-cell *matCellDef="let shipment">{{ shipment.orderId }}</td>
+      </ng-container>
 
-    <ng-container matColumnDef="carrier">
-      <th mat-header-cell *matHeaderCellDef>Carrier</th>
-      <td mat-cell *matCellDef="let shipment">{{ shipment.carrier }}</td>
-    </ng-container>
+      <ng-container matColumnDef="carrier">
+        <th mat-header-cell *matHeaderCellDef>Carrier</th>
+        <td mat-cell *matCellDef="let shipment">{{ shipment.carrier }}</td>
+      </ng-container>
 
-    <ng-container matColumnDef="status">
-      <th mat-header-cell *matHeaderCellDef>Status</th>
-      <td mat-cell *matCellDef="let shipment">
-        <mat-chip [color]="shipment.status === 'RETURNED' ? 'warn' : 'primary'">{{
-          shipment.status
-        }}</mat-chip>
-      </td>
-    </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let shipment">
+          <mat-chip [color]="shipment.status === 'RETURNED' ? 'warn' : 'primary'">{{
+            shipment.status
+          }}</mat-chip>
+        </td>
+      </ng-container>
 
-    <ng-container matColumnDef="trackingNumber">
-      <th mat-header-cell *matHeaderCellDef>Tracking #</th>
-      <td mat-cell *matCellDef="let shipment">{{ shipment.trackingNumber ?? '—' }}</td>
-    </ng-container>
+      <ng-container matColumnDef="trackingNumber">
+        <th mat-header-cell *matHeaderCellDef>Tracking #</th>
+        <td mat-cell *matCellDef="let shipment">{{ shipment.trackingNumber ?? '—' }}</td>
+      </ng-container>
 
-    <ng-container matColumnDef="shippedAt">
-      <th mat-header-cell *matHeaderCellDef>Shipped</th>
-      <td mat-cell *matCellDef="let shipment">
-        {{ shipment.shippedAt ? (shipment.shippedAt | date: 'short') : '—' }}
-      </td>
-    </ng-container>
+      <ng-container matColumnDef="shippedAt">
+        <th mat-header-cell *matHeaderCellDef>Shipped</th>
+        <td mat-cell *matCellDef="let shipment">
+          {{ shipment.shippedAt ? (shipment.shippedAt | date: 'short') : '—' }}
+        </td>
+      </ng-container>
 
-    <ng-container matColumnDef="deliveredAt">
-      <th mat-header-cell *matHeaderCellDef>Delivered</th>
-      <td mat-cell *matCellDef="let shipment">
-        {{ shipment.deliveredAt ? (shipment.deliveredAt | date: 'short') : '—' }}
-      </td>
-    </ng-container>
+      <ng-container matColumnDef="deliveredAt">
+        <th mat-header-cell *matHeaderCellDef>Delivered</th>
+        <td mat-cell *matCellDef="let shipment">
+          {{ shipment.deliveredAt ? (shipment.deliveredAt | date: 'short') : '—' }}
+        </td>
+      </ng-container>
 
-    <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef>Actions</th>
-      <td mat-cell *matCellDef="let shipment">
-        @if (availableTransitions(shipment).length > 0) {
-          <button mat-icon-button [matMenuTriggerFor]="statusMenu" aria-label="Change status">
-            <mat-icon>sync_alt</mat-icon>
-          </button>
-          <mat-menu #statusMenu="matMenu">
-            @for (next of availableTransitions(shipment); track next) {
-              <button mat-menu-item (click)="changeStatus(shipment, next)">
-                Mark as {{ next }}
-              </button>
-            }
-          </mat-menu>
-        }
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let shipment">
+          @if (availableTransitions(shipment).length > 0) {
+            <button mat-icon-button [matMenuTriggerFor]="statusMenu" aria-label="Change status">
+              <mat-icon>sync_alt</mat-icon>
+            </button>
+            <mat-menu #statusMenu="matMenu">
+              @for (next of availableTransitions(shipment); track next) {
+                <button mat-menu-item (click)="changeStatus(shipment, next)">
+                  Mark as {{ next }}
+                </button>
+              }
+            </mat-menu>
+          }
 
-        <span
-          *appHasRole="['ADMIN']"
-          [matTooltip]="
-            isDeletable(shipment) ? '' : 'Only PENDING or RETURNED shipments can be deleted'
-          "
-        >
-          <button
-            mat-icon-button
-            color="warn"
-            [disabled]="!isDeletable(shipment)"
-            (click)="deleteShipment(shipment)"
-            aria-label="Delete"
+          <span
+            *appHasRole="['ADMIN']"
+            [matTooltip]="
+              isDeletable(shipment) ? '' : 'Only PENDING or RETURNED shipments can be deleted'
+            "
           >
-            <mat-icon>delete</mat-icon>
-          </button>
-        </span>
-      </td>
-    </ng-container>
+            <button
+              mat-icon-button
+              color="warn"
+              [disabled]="!isDeletable(shipment)"
+              (click)="deleteShipment(shipment)"
+              aria-label="Delete"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </span>
+        </td>
+      </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-    <tr class="mat-row" *matNoDataRow>
-      <td class="mat-cell no-data-cell" [attr.colspan]="displayedColumns.length">
-        @if (isFiltering()) {
-          No shipments found for the applied filters.
-        } @else {
-          No shipments found. Create one to get started.
-        }
-      </td>
-    </tr>
-  </table>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell no-data-cell" [attr.colspan]="displayedColumns.length">
+          @if (isFiltering()) {
+            No shipments found for the applied filters.
+          } @else {
+            No shipments found. Create one to get started.
+          }
+        </td>
+      </tr>
+    </table>
 
-  <mat-paginator
-    [pageIndex]="pageIndex()"
-    [length]="totalElements()"
-    [pageSize]="pageSize()"
-    [pageSizeOptions]="[10, 20, 50]"
-    (page)="onPageChange($event)"
-  ></mat-paginator>
+    <mat-paginator
+      [pageIndex]="pageIndex()"
+      [length]="totalElements()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="[10, 20, 50]"
+      (page)="onPageChange($event)"
+    ></mat-paginator>
+  }
 </div>

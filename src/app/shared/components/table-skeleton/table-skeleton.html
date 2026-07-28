@@ -1,0 +1,9 @@
+<div class="skeleton-table">
+  @for (row of rowRange.slice(0, rows()); track row) {
+    <div class="skeleton-row">
+      @for (col of rowRange.slice(0, columns()); track col) {
+        <div class="skeleton-cell"></div>
+      }
+    </div>
+  }
+</div>

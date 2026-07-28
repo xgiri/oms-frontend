@@ -16,6 +16,7 @@ import { Inventory } from '../inventory.model';
 import { HasRoleDirective } from '../../../shared/directives/has-role.directive';
 import { ConfirmDialogService } from '../../../shared/services/confirm-dialog.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
+import { TableSkeletonComponent } from '../../../shared/components/table-skeleton/table-skeleton.component';
 
 @Component({
   selector: 'app-inventory-list',
@@ -33,6 +34,7 @@ import { SnackbarService } from '../../../shared/services/snackbar.service';
     MatChipsModule,
     MatProgressSpinnerModule,
     HasRoleDirective,
+    TableSkeletonComponent,
   ],
   templateUrl: './inventory-list.html',
   styleUrl: './inventory-list.scss',

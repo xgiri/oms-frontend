@@ -29,6 +29,7 @@ import { PromptDialogComponent } from '../../../shared/components/prompt-dialog/
 import { ApiError } from '../../../shared/models/api-error.model';
 import { DatePipe } from '@angular/common';
 import { getAllowedTransitions } from '../../../shared/models/status-workflow.model';
+import { TableSkeletonComponent } from '../../../shared/components/table-skeleton/table-skeleton.component';
 
 @Component({
   selector: 'app-shipments-list',
@@ -49,6 +50,7 @@ import { getAllowedTransitions } from '../../../shared/models/status-workflow.mo
     MatProgressSpinnerModule,
     HasRoleDirective,
     DatePipe,
+    TableSkeletonComponent,
   ],
   templateUrl: './shipments-list.html',
   styleUrl: './shipments-list.scss',

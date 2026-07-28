@@ -29,6 +29,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { PromptDialogComponent } from '../../../shared/components/prompt-dialog/prompt-dialog.component';
 import { getAllowedTransitions } from '../../../shared/models/status-workflow.model';
+import { TableSkeletonComponent } from '../../../shared/components/table-skeleton/table-skeleton.component';
 
 @Component({
   selector: 'app-payments-list',
@@ -50,6 +51,7 @@ import { getAllowedTransitions } from '../../../shared/models/status-workflow.mo
     HasRoleDirective,
     DatePipe,
     CurrencyPipe,
+    TableSkeletonComponent,
   ],
   templateUrl: './payments-list.html',
   styleUrl: './payments-list.scss',
