@@ -32,20 +32,17 @@
           <div [formGroupName]="i" class="item-row">
             <mat-form-field appearance="outline" class="product-field">
               <mat-label>Product</mat-label>
-              <input
-                matInput
-                formControlName="product"
-                [matAutocomplete]="productAuto"
-                placeholder="Type to search…"
-              />
-              <mat-autocomplete #productAuto="matAutocomplete" [displayWith]="displayProduct">
+              <mat-select formControlName="productId">
                 @for (product of availableProducts(i); track product.id) {
-                  <mat-option [value]="product"
+                  <mat-option [value]="product.id"
                     >{{ product.name }} ({{ product.price | currency }})</mat-option
                   >
                 }
-              </mat-autocomplete>
-              @if (itemGroup.get('product')?.invalid && itemGroup.get('product')?.touched) {
+              </mat-select>
+              @if (
+                itemGroup.get('productId')?.hasError('required') &&
+                itemGroup.get('productId')?.touched
+              ) {
                 <mat-error>Select a product.</mat-error>
               }
             </mat-form-field>
