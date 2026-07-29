@@ -11,7 +11,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -34,7 +33,6 @@ import { OrderRequest } from '../order.model';
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
     MatButtonModule,
     MatIconModule,
     MatAutocompleteModule,
@@ -56,13 +54,20 @@ export class OrderFormComponent implements OnInit {
   readonly customers = signal<Customer[]>([]);
   readonly products = signal<Product[]>([]);
 
-  // The control's value is one of three things at any moment:
+  // A control's value is one of three things at any moment:
   // - null (nothing typed/selected yet)
   // - a string (the user is typing, hasn't picked an option)
-  // - a real Customer object (a genuine selection was made)
-  // Only the third case is actually valid — this validator enforces that
-  // directly, so there's no separate id control to keep in sync anymore.
+  // - a real object (a genuine selection was made)
+  // Only the third case is actually valid — no separate id control to keep
+  // in sync, since the object itself carries everything needed.
   private readonly requireRealCustomer: ValidatorFn = (control) => {
+    const value = control.value;
+    if (value === null || value === '') return { required: true };
+    if (typeof value === 'string') return { invalidSelection: true };
+    return null;
+  };
+
+  private readonly requireRealProduct: ValidatorFn = (control) => {
     const value = control.value;
     if (value === null || value === '') return { required: true };
     if (typeof value === 'string') return { invalidSelection: true };
@@ -84,23 +89,33 @@ export class OrderFormComponent implements OnInit {
     return `${customer.firstName} ${customer.lastName}`;
   };
 
+  displayProduct = (product: Product | string | null): string => {
+    if (!product) return '';
+    if (typeof product === 'string') return product;
+    return product.name;
+  };
+
   private createItemGroup() {
     return this.fb.group({
-      productId: this.fb.control<number | null>(null, Validators.required),
+      product: this.fb.control<Product | string | null>(null, this.requireRealProduct),
       quantity: this.fb.nonNullable.control(1, [Validators.required, Validators.min(1)]),
     });
   }
 
-  private selectedProductIds(excludingIndex: number): number[] {
+  private selectedProductIdsElsewhere(excludingIndex: number): number[] {
     return this.items.controls
       .filter((_, i) => i !== excludingIndex)
-      .map((group) => group.value.productId)
-      .filter((id): id is number => id !== null);
+      .map((group) => group.value.product)
+      .filter((v): v is Product => v !== null && typeof v !== 'string')
+      .map((p) => p.id);
   }
 
   availableProducts(index: number): Product[] {
-    const usedElsewhere = this.selectedProductIds(index);
-    return this.products().filter((p) => !usedElsewhere.includes(p.id));
+    const usedElsewhere = this.selectedProductIdsElsewhere(index);
+    const query = this.displayProduct(this.items.at(index).value.product).toLowerCase();
+    return this.products()
+      .filter((p) => !usedElsewhere.includes(p.id))
+      .filter((p) => p.name.toLowerCase().includes(query));
   }
 
   filteredCustomers(): Customer[] {
@@ -112,9 +127,9 @@ export class OrderFormComponent implements OnInit {
 
   private selectedProductCount(): number {
     const selected = this.items.controls
-      .map((g) => g.value.productId)
-      .filter((id): id is number => id !== null);
-    return new Set(selected).size;
+      .map((g) => g.value.product)
+      .filter((v): v is Product => v !== null && typeof v !== 'string');
+    return new Set(selected.map((p) => p.id)).size;
   }
 
   get canAddItem(): boolean {
@@ -135,13 +150,14 @@ export class OrderFormComponent implements OnInit {
     }
   }
 
-  productPrice(productId: number | null): number {
-    return productId == null ? 0 : (this.products().find((p) => p.id === productId)?.price ?? 0);
+  private productPrice(index: number): number {
+    const value = this.items.at(index).value.product;
+    return value && typeof value !== 'string' ? value.price : 0;
   }
 
   lineSubtotal(index: number): number {
-    const item = this.items.at(index).value;
-    return this.productPrice(item.productId) * item.quantity;
+    const quantity = this.items.at(index).value.quantity ?? 0;
+    return this.productPrice(index) * quantity;
   }
 
   get estimatedTotal(): number {
@@ -166,7 +182,10 @@ export class OrderFormComponent implements OnInit {
 
     const request: OrderRequest = {
       customerId: customer.id,
-      items: raw.items.map((item) => ({ productId: item.productId!, quantity: item.quantity })),
+      items: raw.items.map((item) => ({
+        productId: (item.product as Product).id, // validator guarantees a real Product here
+        quantity: item.quantity,
+      })),
     };
 
     this.orderService.create(request).subscribe({
