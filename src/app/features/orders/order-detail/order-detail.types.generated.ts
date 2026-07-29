@@ -18,12 +18,31 @@ export type Customer = {
 
 export type OrderDetail = {
   __typename?: 'OrderDetail';
+  /**
+   * ISO-8601 timestamp, passed through from oms-main as a String —
+   * same "don't parse what you can pass through" reasoning as OrderStatus
+   * above, just without an enum's fixed literal set to coerce against.
+   */
+  createdAt: Scalars['String']['output'];
   customer: Customer;
   id: Scalars['ID']['output'];
+  items: Array<OrderItem>;
   payment?: Maybe<Payment>;
   shipment?: Maybe<Shipment>;
   status: OrderStatus;
   totalAmount: Scalars['Float']['output'];
+  /** ISO-8601 timestamp. See createdAt. */
+  updatedAt: Scalars['String']['output'];
+};
+
+export type OrderItem = {
+  __typename?: 'OrderItem';
+  id: Scalars['ID']['output'];
+  productId: Scalars['ID']['output'];
+  productName: Scalars['String']['output'];
+  quantity: Scalars['Int']['output'];
+  subtotal: Scalars['Float']['output'];
+  unitPrice: Scalars['Float']['output'];
 };
 
 /**

@@ -18,5 +18,15 @@ query OrderDetail($id: ID!) {
       status
       trackingNumber
     }
+    items {
+      id
+      productId
+      productName
+      quantity
+      unitPrice
+      subtotal
+    }
+    createdAt
+    updatedAt
   }
 }

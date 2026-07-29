@@ -7,11 +7,15 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { OrderService } from '../order.service';
 import { OrderDetailGraphqlService } from './order-detail-graphql.service';
-import { ADMIN_OVERRIDE_TRANSITIONS, ALLOWED_MANUAL_TRANSITIONS, OrderStatus } from '../order.model';
+import {
+  ADMIN_OVERRIDE_TRANSITIONS,
+  ALLOWED_MANUAL_TRANSITIONS,
+  OrderStatus,
+} from '../order.model';
 import { OrderDetailQuery } from './order-detail.generated';
 import { OrderStatusTimelineComponent } from '../order-status-timeline/order-status-timeline.component';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ApiError } from '../../../shared/models/api-error.model';
 import { interval, switchMap } from 'rxjs';
@@ -19,6 +23,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../auth/auth.service';
 import { MatIconModule } from '@angular/material/icon';
 import { getAllowedTransitions } from '../../../shared/models/status-workflow.model';
+import { MatTableModule } from '@angular/material/table';
 
 type OrderDetail = NonNullable<OrderDetailQuery['orderDetail']>;
 
@@ -30,11 +35,13 @@ type OrderDetail = NonNullable<OrderDetailQuery['orderDetail']>;
     FormsModule,
     MatIconModule,
     MatCardModule,
+    MatTableModule,
     MatButtonModule,
     MatSelectModule,
     MatFormFieldModule,
     OrderStatusTimelineComponent,
     CurrencyPipe,
+    DatePipe,
   ],
   templateUrl: './order-detail.html',
   styleUrl: './order-detail.scss',
@@ -52,6 +59,8 @@ export class OrderDetailComponent implements OnInit {
 
   readonly order = signal<OrderDetail | null>(null);
   readonly updating = signal(false);
+  readonly displayedColumns = ['productName', 'quantity', 'unitPrice', 'subtotal'];
+
   selectedNextStatus: OrderStatus | null = null;
 
   get availableTransitions(): OrderStatus[] {
