@@ -47,7 +47,7 @@ import { TableSkeletonComponent } from '../../../shared/components/table-skeleto
   templateUrl: './order-list.html',
   styleUrl: './order-list.scss',
 })
-export class OrdersListComponent implements OnInit {
+export class OrderListComponent implements OnInit {
   private readonly ordersService = inject(OrderService);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly snackbar = inject(SnackbarService);
